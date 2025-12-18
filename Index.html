@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn Tập Toàn Bộ 12 Bài Tin Học 12</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --danger: #e74c3c; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: var(--primary); font-size: 1.5rem; border-bottom: 3px solid var(--accent); padding-bottom: 10px; }
+        .score-board { position: fixed; top: 10px; right: 10px; background: var(--primary); color: white; padding: 10px 15px; border-radius: 10px; font-weight: bold; z-index: 1000; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .lesson-group { margin-top: 30px; border: 2px solid #eee; border-radius: 10px; overflow: hidden; }
+        .lesson-header { background: var(--primary); color: white; padding: 10px 15px; font-weight: bold; }
+        .q-card { padding: 15px; border-bottom: 1px solid #eee; position: relative; }
+        .badge { font-size: 0.7rem; padding: 3px 7px; border-radius: 5px; color: white; float: right; text-transform: uppercase; }
+        .biết { background: #27ae60; } .hiểu { background: #f1c40f; color: black; } .vận-dụng { background: #e67e22; }
+        .options { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .opt-btn { text-align: left; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #fff; cursor: pointer; transition: 0.2s; font-size: 0.95rem; }
+        .opt-btn:hover:not(.disabled) { background: #eef7ff; border-color: var(--accent); }
+        .correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; font-weight: bold; }
+        .wrong { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
+        .disabled { pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<div class="score-board">Điểm: <span id="score">0</span> / 48</div>
+
+<div class="container">
+    <h1>TRẮC NGHIỆM TIN HỌC 12 (BÀI 1 - BÀI 12)</h1>
+    <div id="quiz-container"></div>
+</div>
+
+<script>
+const data = [
+    { b: 1, t: "Làm quen với AI", qs: [
+        { q: "Năm nào thuật ngữ Trí tuệ nhân tạo chính thức ra đời?", a: ["1950", "1956", "1970", "2016"], c: 1, l: "biết" },
+        { q: "Đặc trưng 'Khả năng học' của AI thể hiện rõ nhất qua việc nào?", a: ["Máy tính chạy nhanh hơn", "YouTube đề xuất video dựa trên lịch sử xem", "Máy tính lưu trữ nhiều ảnh", "Máy tính kết nối wifi"], c: 1, l: "hiểu" },
+        { q: "Hệ chuyên gia MYCIN được coi là loại AI nào?", a: ["AI mạnh", "AI yếu", "Siêu trí tuệ", "AI tổng quát"], c: 1, l: "hiểu" },
+        { q: "Sử dụng camera quét khuôn mặt để mở khóa điện thoại là vận dụng đặc trưng nào?", a: ["Khả năng suy luận", "Khả năng nhận thức", "Khả năng giao tiếp", "Khả năng vận động"], c: 1, l: "vận-dụng" }
+    ]},
+    { b: 2, t: "AI trong cuộc sống", qs: [
+        { q: "Lĩnh vực nào AI giúp cá nhân hóa lộ trình học tập?", a: ["Y tế", "Giáo dục", "Tài chính", "Sản xuất"], c: 1, l: "biết" },
+        { q: "Công nghệ Deepfake gây ra lo ngại lớn nhất về vấn đề gì?", a: ["Tốn điện", "An ninh và tin giả", "Hỏng máy tính", "Mất kết nối"], c: 1, l: "hiểu" },
+        { q: "Tại sao AI được dùng trong chẩn đoán y tế?", a: ["Vì nó làm thay bác sĩ hoàn toàn", "Vì nó phân tích hình ảnh X-quang nhanh và chính xác", "Vì nó rẻ hơn thuốc", "Vì nó không cần điện"], c: 1, l: "hiểu" },
+        { q: "Bạn thấy quảng cáo đúng món đồ vừa tìm kiếm, đó là ứng dụng AI trong:", a: ["Sản xuất", "Marketing/Tài chính", "Nông nghiệp", "Quân sự"], c: 1, l: "vận-dụng" }
+    ]},
+    { b: 3, t: "Sơ lược về thiết kế web", qs: [
+        { q: "Ngôn ngữ dùng để tạo cấu trúc trang web là gì?", a: ["Python", "HTML", "C++", "Java"], c: 1, l: "biết" },
+        { q: "Giao thức nào dùng để truyền tải trang web từ máy chủ đến máy khách?", a: ["FTP", "HTTP/HTTPS", "SMTP", "TCP/IP"], c: 1, l: "hiểu" },
+        { q: "Tên miền (Domain Name) có vai trò gì?", a: ["Lưu trữ ảnh", "Thay thế địa chỉ IP khó nhớ bằng tên dễ nhớ", "Tăng tốc độ mạng", "Bảo mật máy tính"], c: 1, l: "hiểu" },
+        { q: "Khi truy cập 'google.com', phần '.com' được gọi là:", a: ["Tên miền cấp thấp", "Tên miền cấp cao nhất (TLD)", "Giao thức", "Đường dẫn"], c: 1, l: "vận-dụng" }
+    ]},
+    { b: 4, t: "Sử dụng công cụ tạo web", qs: [
+        { q: "Công cụ nào cho phép tạo web mà không cần viết code?", a: ["Notepad", "Google Sites", "Sublime Text", "Visual Studio Code"], c: 1, l: "biết" },
+        { q: "Lợi ích lớn nhất của việc dùng Google Sites là gì?", a: ["Chỉnh sửa được mọi mã nguồn", "Dễ sử dụng, miễn phí và kéo thả", "Chạy được ứng dụng nặng", "Bảo mật tuyệt đối"], c: 1, l: "hiểu" },
+        { q: "Để nhiều người cùng chỉnh sửa một trang web trên Google Sites, bạn dùng tính năng:", a: ["Publish", "Share (Chia sẻ)", "Preview", "Themes"], c: 1, l: "hiểu" },
+        { q: "Để đưa trang web Google Sites lên internet cho mọi người xem, bạn nhấn nút:", a: ["Save", "Publish", "Insert", "Pages"], c: 1, l: "vận-dụng" }
+    ]},
+    { b: 5, t: "Định dạng văn bản và chèn đối tượng", qs: [
+        { q: "Thẻ nào dùng để chèn hình ảnh vào trang web?", a: ["<link>", "<img>", "<picture>", "<src>"], c: 1, l: "biết" },
+        { q: "Sự khác biệt giữa thẻ <ul> và <ol> là gì?", a: ["<ul> không có danh sách", "<ul> dùng ký hiệu đầu dòng, <ol> đánh số", "<ul> to hơn <ol>", "<ul> chỉ dùng cho chữ"], c: 1, l: "hiểu" },
+        { q: "Thẻ <h1> có ý nghĩa gì trong SEO và hiển thị?", a: ["Làm chữ nghiêng", "Tiêu đề quan trọng nhất, kích thước lớn nhất", "Tạo liên kết", "Chèn video"], c: 1, l: "hiểu" },
+        { q: "Cấu trúc đúng để chèn ảnh 'logo.png' rộng 200px là:", a: ["<img src='logo.png' width='200'>", "<img link='logo.png'>", "<image src='logo.png'>", "<img width='200'>"], c: 0, l: "vận-dụng" }
+    ]},
+    { b: 6, t: "Tạo biểu mẫu (Form)", qs: [
+        { q: "Thẻ nào bao quanh toàn bộ các ô nhập liệu?", a: ["<input>", "<form>", "<select>", "<label>"], c: 1, l: "biết" },
+        { q: "Khi nào dùng Radio Button thay vì Checkbox?", a: ["Khi chọn nhiều phương án", "Khi chỉ được chọn duy nhất 1 phương án", "Khi nhập mật khẩu", "Khi tải file"], c: 1, l: "hiểu" },
+        { q: "Thuộc tính 'placeholder' trong thẻ input dùng để:", a: ["Đặt tên ô", "Hiển thị văn bản gợi ý mờ trong ô", "Bắt buộc nhập", "Thay đổi màu chữ"], c: 1, l: "hiểu" },
+        { q: "Để tạo nút bấm gửi dữ liệu đi, bạn dùng loại input nào?", a: ["type='button'", "type='submit'", "type='reset'", "type='text'"], c: 1, l: "vận-dụng" }
+    ]},
+    // Các bài tiếp theo (Tóm tắt theo chương trình mới)
+    { b: 7, t: "Giới thiệu CSS", qs: [
+        { q: "CSS dùng để làm gì trong trang web?", a: ["Tạo nội dung", "Định dạng và làm đẹp giao diện", "Xử lý dữ liệu", "Kết nối database"], c: 1, l: "biết" },
+        { q: "Đâu là cách viết CSS nội dòng (Inline)?", a: ["<style>", "Thuộc tính style='' trong thẻ", "<link>", "File .css"], c: 1, l: "hiểu" },
+        { q: "Để chọn tất cả các thẻ <p> trong CSS, ta dùng selector:", a: [".p", "p", "#p", "*p"], c: 1, l: "hiểu" },
+        { q: "Để chữ trong thẻ <h1> có màu đỏ, ta viết:", a: ["h1 {color: red;}", "h1 {font-color: red;}", "h1: red;", "h1 = red"], c: 0, l: "vận-dụng" }
+    ]},
+    { b: 8, t: "Định dạng màu sắc và font chữ", qs: [
+        { q: "Thuộc tính nào đổi màu nền trong CSS?", a: ["color", "background-color", "bgcolor", "bg"], c: 1, l: "biết" },
+        { q: "Đơn vị 'px' trong CSS là viết tắt của:", a: ["Picture", "Pixel", "Point", "Percent"], c: 1, l: "hiểu" },
+        { q: "Thuộc tính font-family dùng để:", a: ["Đổi cỡ chữ", "Đổi kiểu chữ (phông chữ)", "Đổi độ đậm", "Căn lề"], c: 1, l: "hiểu" },
+        { q: "Cách viết màu đỏ theo hệ Hex là:", a: ["rgb(255,0,0)", "#FF0000", "red", "Cả 3 đều đúng"], c: 3, l: "vận-dụng" }
+    ]},
+    { b: 9, t: "Mô hình hộp (Box model)", qs: [
+        { q: "Thành phần nào nằm giữa Content và Border?", a: ["Margin", "Padding", "Outline", "Width"], c: 1, l: "biết" },
+        { q: "Margin dùng để làm gì?", a: ["Tạo khoảng cách bên trong thẻ", "Tạo khoảng cách bên ngoài thẻ", "Làm dày viền", "Đổi màu nền"], c: 1, l: "hiểu" },
+        { q: "Độ rộng thực của một phần tử được tính bởi:", a: ["Chỉ Width", "Width + Padding + Border", "Chỉ Padding", "Width + Margin"], c: 1, l: "hiểu" },
+        { q: "Để viền thẻ có độ dày 2px, nét liền, màu đen, ta viết:", a: ["border: 2px solid black;", "border: 2px black;", "viền: 2px;", "border-width: 2px;"], c: 0, l: "vận-dụng" }
+    ]},
+    { b: 10, t: "Bố cục trang web", qs: [
+        { q: "Thuộc tính nào giúp sắp xếp các phần tử theo hàng hoặc cột linh hoạt?", a: ["display: block", "display: flex", "float", "position"], c: 1, l: "biết" },
+        { q: "Trong Flexbox, 'justify-content' dùng để căn chỉnh theo trục nào?", a: ["Trục dọc", "Trục ngang", "Đường chéo", "Căn lề viền"], c: 1, l: "hiểu" },
+        { q: "Thẻ <div> thường được dùng để làm gì?", a: ["Chèn ảnh", "Tạo một khối (container) để gom nhóm nội dung", "Viết tiêu đề", "Tạo liên kết"], c: 1, l: "hiểu" },
+        { q: "Để hai thẻ div nằm cạnh nhau trên cùng một hàng, ta dùng:", a: ["display: flex", "display: block", "margin: 0", "padding: 0"], c: 0, l: "vận-dụng" }
+    ]},
+    { b: 11, t: "Tạo liên kết và bảng", qs: [
+        { q: "Thẻ nào dùng để tạo liên kết (Hyperlink)?", a: ["<link>", "<a>", "<href>", "<url>"], c: 1, l: "biết" },
+        { q: "Trong bảng (table), thẻ <tr> dùng để tạo:", a: ["Cột", "Hàng", "Tiêu đề", "Ô dữ liệu"], c: 1, l: "hiểu" },
+        { q: "Thuộc tính 'target=\"_blank\"' có tác dụng gì?", a: ["Đóng trang web", "Mở liên kết trong một thẻ/tab mới", "Tải file", "Chuyển màu liên kết"], c: 1, l: "hiểu" },
+        { q: "Để tạo một ô dữ liệu trong bảng, ta dùng thẻ:", a: ["<table>", "<td>", "<tr>", "<th>"], c: 1, l: "vận-dụng" }
+    ]},
+    { b: 12, t: "Thực hành tổng hợp", qs: [
+        { q: "Quy trình thiết kế web thường bắt đầu từ bước nào?", a: ["Viết code ngay", "Xác định mục tiêu và phác thảo sơ đồ (Sitemap)", "Mua tên miền", "Quảng cáo"], c: 1, l: "biết" },
+        { q: "Tại sao cần kiểm thử trang web trên nhiều thiết bị (Mobile, Tablet, PC)?", a: ["Để cho đẹp", "Đảm bảo giao diện hiển thị đúng (Responsive)", "Để tốn thời gian", "Để tăng dung lượng"], c: 1, l: "hiểu" },
+        { q: "Tệp tin trang chủ của một website thường được đặt tên là:", a: ["home.html", "index.html", "main.html", "start.html"], c: 1, l: "hiểu" },
+        { q: "Để kiểm tra mã nguồn HTML của một trang web bất kỳ, bạn dùng phím:", a: ["F1", "F12 (hoặc Chuột phải -> Inspect)", "F5", "Ctrl+S"], c: 1, l: "vận-dụng" }
+    ]}
+];
+
+const container = document.getElementById('quiz-container');
+let currentScore = 0;
+
+data.forEach(lesson => {
+    const section = document.createElement('div');
+    section.className = 'lesson-group';
+    section.innerHTML = `<div class="lesson-header">Bài ${lesson.b}: ${lesson.t}</div>`;
+    
+    lesson.qs.forEach((q, idx) => {
+        const qCard = document.createElement('div');
+        qCard.className = 'q-card';
+        qCard.innerHTML = `
+            <span class="badge ${q.l}">${q.l}</span>
+            <p><strong>Câu ${idx+1}:</strong> ${q.q}</p>
+            <div class="options" id="opt-${lesson.b}-${idx}">
+                ${q.a.map((opt, i) => `<button class="opt-btn" onclick="check(${lesson.b}, ${idx}, ${i}, this)">${opt}</button>`).join('')}
+            </div>
+        `;
+        section.appendChild(qCard);
+    });
+    container.appendChild(section);
+});
+
+function check(lId, qIdx, sIdx, btn) {
+    const correct = data.find(l => l.b === lId).qs[qIdx].c;
+    const parent = document.getElementById(`opt-${lId}-${qIdx}`);
+    const btns = parent.getElementsByClassName('opt-btn');
+
+    for (let b of btns) b.classList.add('disabled');
+
+    if (sIdx === correct) {
+        btn.classList.add('correct');
+        currentScore++;
+        document.getElementById('score').innerText = currentScore;
+    } else {
+        btn.classList.add('wrong');
+        btns[correct].classList.add('correct');
+    }
+}
+</script>
+
+</body>
+</html>
